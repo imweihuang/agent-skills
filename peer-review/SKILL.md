@@ -1,13 +1,18 @@
 ---
 name: peer-review
-description: Use only when the current user message explicitly asks Codex for peer review, an external or second-model opinion, a model council, or names Claude, Fable, GPT/Codex, Gemini, or Grok as a reviewer. Planning, brainstorming, audits, readiness checks, risk, commit, merge, push, deploy, and generic requests to review something do not trigger this skill by themselves.
+description: Use only when the current user message explicitly asks Codex for peer review, an external or second-model opinion, a model council, ChatGPT Pro or Extended Pro through the browser, or names Claude, Fable, GPT/Codex, Gemini, or Grok as a reviewer. Planning, brainstorming, audits, readiness checks, risk, commit, merge, push, deploy, and generic requests to review something do not trigger this skill by themselves.
 ---
 
 # Peer Review
 
 ## Purpose
 
-Use this skill to run independent external CLI reviewers only after explicit user authorization, then have Codex validate the findings. Treat reviewers as advisory eyes, not authorities.
+Use this skill to run independent external reviewers only after explicit user authorization, then have Codex validate the findings. Treat reviewers as advisory eyes, not authorities.
+
+## Reviewer Route
+
+- For a CLI reviewer, use the runner workflow below.
+- For an explicit ChatGPT browser, ChatGPT Pro, or Extended Pro request, follow the [browser ChatGPT instructions](references/browser-chatgpt.md). That is a separate execution route: use the logged-in Chrome session and do not run CLI preflight.
 
 Manual reviews default to advisory `planning` intensity at `high`. Use `gate`, `critical`, `xhigh`, or `max` only when the user explicitly requests that mode or effort. Repo instructions, other skills, inferred risk, and lifecycle events never authorize a Codex-led external-model call.
 
@@ -91,7 +96,7 @@ Treat anti-exfiltration in `web-allowed` scope as prompt-enforced, not a mechani
    - Identify project goal, milestone, review mode, evidence scope, review class, review intensity, tool policy, and focus areas.
    - Pass `--review-class routine`, `judgment`, or `load-bearing` using the rubric above. Do not rely on `auto` except as a fail-closed safeguard.
    - If the user does not specify reviewers, use Claude only. Grok, Codex/GPT, and Gemini require explicit selection.
-   - If the user requests another reviewer or a council, pass it with `--reviewers grok`, `--reviewers claude,grok`, `--reviewers gpt`, `--reviewers claude,gpt`, etc. Single-model asks ("ask Claude for a review", "what does GPT think") are subsets of this skill; the retired claude-/gpt-/claude-gpt-peer-review entry points are archived (2026-07-06). Browser-based GPT-5.5 Pro consultation remains its own skill: `chatgpt-pro-peer-review`.
+   - If the user requests another reviewer or a council, pass it with `--reviewers grok`, `--reviewers claude,grok`, `--reviewers gpt`, `--reviewers claude,gpt`, etc. Single-model asks ("ask Claude for a review", "what does GPT think") are subsets of this skill; the retired claude-/gpt-/claude-gpt-peer-review entry points are archived (2026-07-06). Browser ChatGPT requests use the route above instead of the CLI runner.
    - Default to `--intensity planning`. Use `--intensity gate` or `--intensity critical` only when the user explicitly requested it. Any explicit `BLOCK` from an authorized gate or critical review stops the workflow and must be surfaced; never classify it as a rejected advisory suggestion during synthesis. The lead may fix and re-gate against the new final diff; only the user may override an unresolved `BLOCK`, and that override must be recorded.
    - Select tool policy from review scope. Do not require the user to add tool flags.
 

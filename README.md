@@ -29,11 +29,10 @@ Replace `peer-review` with any folder in this repository.
 
 | Skill | Use when |
 | --- | --- |
-| `peer-review` | You want independent Claude, Codex/GPT, and Grok CLI review with explicit scope, effort, and tool policy. |
+| `peer-review` | You want an explicitly authorized external review through the CLI roster or logged-in ChatGPT browser route. |
 | `claude-peer-review` | You specifically want a Claude-only review through the unified runner. |
 | `gpt-peer-review` | You specifically want a Codex/GPT-only review through the unified runner. |
 | `claude-gpt-peer-review` | You want independent Claude plus Codex/GPT review. |
-| `chatgpt-pro-peer-review` | You want a browser-backed ChatGPT Pro review using your logged-in browser session. |
 | `audit-ai-code` | You want to remove AI-shaped backend/general code problems such as duplicate helpers, fixture hacks, brittle tests, or over-defensive control flow. |
 | `audit-ai-frontend` | You want to de-slop UI code, component APIs, responsive behavior, accessibility, and design-system drift. |
 | `audit-ai-writing` | You want to audit prose for generic LLM tells, weak audience modeling, placeholders, markup issues, or citation problems. |
@@ -64,6 +63,12 @@ Replace `peer-review` with any folder in this repository.
 The `peer-review` skill is the most tool-heavy skill in this repository. It
 builds a safe context bundle, runs independent reviewers, and asks Codex to
 validate the findings instead of accepting model output blindly.
+
+Explicit ChatGPT Pro, Extended Pro, or browser ChatGPT requests use the
+browser route inside `peer-review`. That route uses the logged-in Chrome
+session and verifies the visible requested model selector before submitting.
+The former standalone `chatgpt-pro-peer-review` folder remains only as legacy
+source history and is not recommended for new installs.
 
 Peer review is manual-only: no model runs unless the user explicitly requests
 external review. An authorized review uses Claude only unless the user names
@@ -143,8 +148,7 @@ as workflow instructions, not a substitute for your own security policy.
 Most skills only require Codex skill support and normal repo tools such as Git.
 Some skills have optional external dependencies:
 
-- `peer-review`: `claude`, `codex`, and `grok` CLIs for the default reviewer roster.
-- `chatgpt-pro-peer-review`: Chrome, the Codex browser control path, and a logged-in ChatGPT Pro session.
+- `peer-review`: reviewer CLIs for CLI routes, or Chrome with the Codex control path and a logged-in ChatGPT session for the browser route.
 - `compare-screenshots`: Node.js and image-processing dependencies used by its helper script.
 - `github-ci-cost-control`: Python 3 for the workflow inspection helper.
 
@@ -169,10 +173,10 @@ tests/
 
 ## Validation
 
-Run the bundled peer-review tests:
+Run the bundled policy and peer-review tests:
 
 ```bash
-python3 -m unittest tests.test_peer_review_scripts
+python3 -m unittest discover -s tests
 ```
 
 Run a quick public-release scan before publishing changes:

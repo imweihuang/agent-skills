@@ -18,10 +18,9 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 CONTEXT_SCRIPT = REPO_ROOT / "peer-review" / "scripts" / "build_review_context.py"
 RUNNER_SCRIPT = REPO_ROOT / "peer-review" / "scripts" / "run_peer_review.py"
 REFRESH_SCRIPT = REPO_ROOT / "peer-review" / "scripts" / "refresh_peer_review_clis.py"
-CHATGPT_PRO_SKILL = REPO_ROOT / "chatgpt-pro-peer-review" / "SKILL.md"
-CHATGPT_PRO_METADATA = REPO_ROOT / "chatgpt-pro-peer-review" / "agents" / "openai.yaml"
 PEER_REVIEW_SKILL = REPO_ROOT / "peer-review" / "SKILL.md"
 PEER_REVIEW_METADATA = REPO_ROOT / "peer-review" / "agents" / "openai.yaml"
+BROWSER_CHATGPT_REFERENCE = REPO_ROOT / "peer-review" / "references" / "browser-chatgpt.md"
 README = REPO_ROOT / "README.md"
 
 
@@ -896,27 +895,35 @@ Available models:
 
 
 class SkillDocumentationTests(unittest.TestCase):
-    def test_chatgpt_pro_skill_is_discoverable_and_guarded(self) -> None:
-        text = CHATGPT_PRO_SKILL.read_text(encoding="utf-8")
+    def test_peer_review_routes_browser_chatgpt_with_selector_guards(self) -> None:
+        skill = PEER_REVIEW_SKILL.read_text(encoding="utf-8")
+        reference = BROWSER_CHATGPT_REFERENCE.read_text(encoding="utf-8")
+        metadata = PEER_REVIEW_METADATA.read_text(encoding="utf-8")
+        readme = README.read_text(encoding="utf-8")
 
-        self.assertIn("name: chatgpt-pro-peer-review", text)
-        self.assertIn("Use when", text)
-        self.assertIn("GPT-5.5 Pro", text)
-        self.assertIn("Extended Pro", text)
-        self.assertIn("Chrome", text)
-        self.assertIn("Do not submit", text)
-        self.assertIn("context helper", text)
-        self.assertIn("manual browser", text)
-        self.assertIn("45 minutes", text)
-        self.assertIn("CHATGPT_PRO_BROWSER_TIMEOUT_SECONDS", text)
-        self.assertIn("poll", text)
-        self.assertIn("handoff", text)
-
-    def test_chatgpt_pro_skill_has_ui_metadata(self) -> None:
-        text = CHATGPT_PRO_METADATA.read_text(encoding="utf-8")
-
-        self.assertIn("display_name: \"ChatGPT Pro Peer Review\"", text)
-        self.assertIn("$chatgpt-pro-peer-review", text)
+        self.assertIn("ChatGPT Pro", skill)
+        self.assertIn("references/browser-chatgpt.md", skill)
+        self.assertIn("do not run CLI preflight", skill)
+        self.assertIn("logged-in session", reference)
+        self.assertIn("do not use the in-app browser", reference)
+        self.assertIn("Before filling or submitting", reference)
+        self.assertIn("visible model selector", reference)
+        self.assertIn("Never silently substitute", reference)
+        for status in (
+            "unavailable_browser",
+            "login_required",
+            "captcha_required",
+            "model_not_selected",
+            "manual_action_required",
+        ):
+            self.assertIn(status, reference)
+        self.assertIn("Poll in short calls", reference)
+        self.assertIn("45 minutes", reference)
+        self.assertIn("CHATGPT_PRO_BROWSER_TIMEOUT_SECONDS", reference)
+        self.assertIn("conversation URL", reference)
+        self.assertIn("exact observed selector", reference)
+        self.assertIn("browser requests", metadata)
+        self.assertIn("legacy source history", " ".join(readme.split()))
 
     def test_peer_review_docs_use_grok_45_default(self) -> None:
         skill_text = PEER_REVIEW_SKILL.read_text(encoding="utf-8")
